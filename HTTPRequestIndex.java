@@ -1,4 +1,5 @@
 
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,34 +8,28 @@ public class HTTPRequestIndex {
     public void processIndex(String indexURL) {
 
         System.out.println("\n====================================");
-        System.out.println("       HTTP REQUEST INDEX");
+        System.out.println("         HTTP REQUEST INDEX");
         System.out.println("====================================");
 
-        System.out.println("Index URL: " + indexURL);
-
         // Retrieve the JSON index
-        HTTPRequest indexRequest = new HTTPRequest();
+        HttpRequest indexRequest = new HttpRequest();
 
-        indexRequest.retrieveData(indexURL);
-
-        String indexData = indexRequest.getResponseData();
-
-        if (indexData == null) {
-            System.out.println("Unable to retrieve index data.");
+        if (!indexRequest.readURL(indexURL)) {
+            System.out.println("Unable to retrieve index.");
             return;
         }
 
-        // Print original JSON index
-        System.out.println("\n====================================");
-        System.out.println("          ORIGINAL INDEX DATA");
-        System.out.println("====================================");
+        // Print original index data
+        System.out.println("\nORIGINAL INDEX DATA");
+        System.out.println("------------------------------------");
+        System.out.println(indexRequest);
 
-        System.out.println(indexData);
+        // Find URLs inside the JSON index
+        String indexData = indexRequest.toString();
 
-        // Find additional URLs inside the JSON
         Pattern pattern = Pattern.compile(
-                "https?://[^\\s\"\\\\<>]+",
-                Pattern.CASE_INSENSITIVE
+            "https?://[^\\s\"\\\\<>]+",
+            Pattern.CASE_INSENSITIVE
         );
 
         Matcher matcher = pattern.matcher(indexData);
@@ -44,25 +39,31 @@ public class HTTPRequestIndex {
         while (matcher.find()) {
 
             String additionalURL = matcher.group();
-
-            // Remove common trailing punctuation
             additionalURL = additionalURL.replaceAll("[,;)}]+$", "");
+
+            // Skip the original index URL
+            if (additionalURL.equals(indexURL)) {
+                continue;
+            }
 
             count++;
 
             System.out.println("\n====================================");
-            System.out.println("       ADDITIONAL URL #" + count);
+            System.out.println("ADDITIONAL URL #" + count);
             System.out.println("====================================");
 
-            HTTPRequest additionalRequest = new HTTPRequest();
+            HttpRequest additionalRequest = new HttpRequest();
 
-            additionalRequest.retrieveData(additionalURL);
+            if (additionalRequest.readURL(additionalURL)) {
+                System.out.println(additionalRequest);
+            } else {
+                System.out.println("Unable to retrieve: " + additionalURL);
+            }
         }
 
         System.out.println("\n====================================");
-        System.out.println("       INDEX PROCESSING COMPLETE");
-        System.out.println("Total URLs found: " + count);
+        System.out.println("INDEX PROCESSING COMPLETE");
+        System.out.println("Additional URLs found: " + count);
         System.out.println("====================================");
-
     }
 }

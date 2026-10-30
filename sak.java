@@ -1,6 +1,7 @@
 // Main App Ibrahim Mansour 
 
 
+
 public class sak {
 
     public static void main(String[] args) {
@@ -21,18 +22,21 @@ public class sak {
 
             if (args.length < 2) {
                 System.out.println("Error: Please provide a URL.");
-                System.out.println("Example: java sak -HttpRequest https://example.com");
                 return;
             }
 
-            HTTPRequest request = new HTTPRequest();
-            request.retrieveData(args[1]);
+            HttpRequest request = new HttpRequest();
+
+            if (request.readURL(args[1])) {
+                System.out.println(request);
+            } else {
+                System.out.println("Unable to retrieve URL.");
+            }
 
         } else if (command.equalsIgnoreCase("-HttpRequestIndex")) {
 
             if (args.length < 2) {
-                System.out.println("Error: Please provide the index URL.");
-                System.out.println("Example: java sak -HttpRequestIndex https://thunderbird-index-sp22.azurewebsites.net/index-w0a6zk195d");
+                System.out.println("Error: Please provide an index URL.");
                 return;
             }
 
@@ -42,7 +46,8 @@ public class sak {
         } else {
 
             System.out.println("Unknown command: " + command);
-            System.out.println("Type java sak -Help for available commands.");
+            System.out.println("Type java sak -Help for instructions.");
+
         }
     }
 }
